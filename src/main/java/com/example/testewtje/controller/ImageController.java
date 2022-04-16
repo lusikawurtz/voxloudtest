@@ -29,7 +29,7 @@ public class ImageController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity createImages(@RequestBody List<Image> images, String username) {
+    public ResponseEntity createImages(@RequestBody List<Image> images, @RequestParam String username) {
         imageService.createImages(images, username);
         return ResponseEntity.ok().build();
     }

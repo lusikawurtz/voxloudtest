@@ -1,13 +1,11 @@
 package com.example.testewtje.model.dto;
 
-import com.example.testewtje.model.entyties.TagEntity;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Objects;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -18,7 +16,7 @@ public class Image {
     private String contentType;
     private BigDecimal size;
     private String reference;
-    private Set<TagEntity> tags;
+    private String tags;
 
     @Override
     public boolean equals(Object o) {

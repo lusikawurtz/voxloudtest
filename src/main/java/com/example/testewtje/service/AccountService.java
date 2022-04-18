@@ -21,6 +21,6 @@ public interface AccountService {
 
     Optional<AccountEntity> findByUsername(String username);
 
-    void saveImagesToAccount(List<ImageEntity> images);
+    void saveImagesToAccount(List<ImageEntity> images, String username);
 
 }

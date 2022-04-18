@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,25 +28,17 @@ public class ImageServiceImpl implements ImageService {
 
 
     @Override
-    public Page<ImageEntity> getAllImages(Pageable pageable) {
-        List<ImageEntity> images = repository.findAll();
-
-        int page = pageable.getPageNumber() > 0 ? pageable.getPageNumber() - 1 : 0;
-        List<ImageEntity> paged = images
-                .stream()
-                .skip((long) pageable.getPageSize() * page)
-                .limit(pageable.getPageSize())
-                .collect(Collectors.toList());
-        return new PageImpl<>(paged, pageable, images.size());
-    }
-
-    @Override
     public Page<ImageEntity> getAllImagesByProperty(Image image, Pageable pageable) {
-        List<ImageEntity> images = repository.findAll(Specification
-                .where(hasName(image.getName()))
-                .or(hasContentType(image.getContentType()))
-                .or(isSized(image.getSize()))
-                .or(hasReference(image.getReference())));
+        List<ImageEntity> images;
+
+        if (image != null) {
+            images = repository.findAll(Specification
+                    .where(hasName(image.getName()))
+                    .or(hasContentType(image.getContentType()))
+                    .or(isSized(image.getSize()))
+                    .or(hasReference(image.getReference())));
+        } else
+            images = repository.findAll();
 
         int page = pageable.getPageNumber() > 0 ? pageable.getPageNumber() - 1 : 0;
         List<ImageEntity> paged = images
@@ -61,15 +52,17 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public void createImages(List<Image> images, String username) {
         List<ImageEntity> imageEntities = new ArrayList<>();
+        Date currentDate = new Date();
+
         images.forEach(image -> {
             ImageEntity newImage = mapper.map(image);
-            newImage.setOwnerId(accountService.findByUsername(username).get());
-            newImage.setCreatedAt(new Date());
-            newImage.setUpdatedAt(new Date());
+            newImage.setOwnerId(accountService.findByUsername(username).get().getId());
+            newImage.setCreatedAt(currentDate);
+            newImage.setUpdatedAt(currentDate);
             repository.save(newImage);
             imageEntities.add(newImage);
         });
-        accountService.saveImagesToAccount(imageEntities);
+        accountService.saveImagesToAccount(imageEntities, username);
     }
 
     @Override
@@ -78,18 +71,20 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void modifyImage(Long id, Image image, String username) {
-        AccountEntity account = accountService.findByUsername(username).get();
+    public void modifyImage(Long id, AccountEntity account, Image image) {
+        ImageEntity resultImage = mapper.map(image);
 
-        if (account.getImages().contains(repository.findById(id).get())) {
-            ImageEntity oldImage = mapper.map(image);
-            oldImage.setId(id);
-            oldImage.setUpdatedAt(new Date());
-            repository.save(oldImage);
-            accountService.saveImagesToAccount(List.of(oldImage));
-        }
+        resultImage.setId(id);
+        resultImage.setOwnerId(account.getId());
+        resultImage.setCreatedAt(findById(id).getCreatedAt());
+        resultImage.setUpdatedAt(new Date());
+        repository.save(resultImage);
     }
 
+    @Override
+    public ImageEntity findById(Long id) {
+        return repository.findById(id).get();
+    }
 
     static Specification<ImageEntity> hasName(String name) {
         return (image, cq, cb) -> cb.equal(image.get("name"), name);

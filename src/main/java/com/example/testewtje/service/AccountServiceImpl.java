@@ -47,8 +47,17 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void createAccount(Account account) {
         AccountEntity newAccount = mapper.map(account);
-        newAccount.setCreatedAt(new Date());
-        newAccount.setUpdatedAt(new Date());
+        Date currentDate = new Date();
+
+        newAccount.setCreatedAt(currentDate);
+        newAccount.setUpdatedAt(currentDate);
+        repository.save(newAccount);
+
+        newAccount.getImages().forEach(image -> {
+            image.setOwnerId(newAccount.getId());
+            image.setCreatedAt(currentDate);
+            image.setUpdatedAt(currentDate);
+        });
         repository.save(newAccount);
     }
 
@@ -63,10 +72,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void saveImagesToAccount(List<ImageEntity> images) {
-
+    public void saveImagesToAccount(List<ImageEntity> images, String username) {
+        AccountEntity account = repository.findByUsername(username).get();
+        account.getImages().addAll(images);
+        repository.save(account);
     }
-
 
     static Specification<AccountEntity> hasName(String name) {
         return (image, cq, cb) -> cb.equal(image.get("name"), name);

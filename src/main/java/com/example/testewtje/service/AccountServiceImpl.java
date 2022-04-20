@@ -10,11 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,19 +64,28 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void deleteAccount(Long id) {
-        repository.delete(repository.findById(id).get());
+        repository.delete(repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
     @Override
-    public Optional<AccountEntity> findByUsername(String username) {
-        return repository.findByUsername(username);
+    public AccountEntity findById(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    @Override
+    public AccountEntity findByUsername(String username) {
+        return repository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @Override
     public void saveImagesToAccount(List<ImageEntity> images, String username) {
-        AccountEntity account = repository.findByUsername(username).get();
-        account.getImages().addAll(images);
-        repository.save(account);
+        try {
+            AccountEntity account = repository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+            account.getImages().addAll(images);
+            repository.save(account);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     static Specification<AccountEntity> hasName(String name) {

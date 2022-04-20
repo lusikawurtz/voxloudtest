@@ -1,8 +1,9 @@
 package com.example.testewtje.service;
 
 import com.example.testewtje.model.dto.Image;
-import com.example.testewtje.model.entyties.AccountEntity;
+import com.example.testewtje.model.dto.Tag;
 import com.example.testewtje.model.entyties.ImageEntity;
+import com.example.testewtje.model.entyties.TagEntity;
 import com.example.testewtje.model.mapper.ImageMapper;
 import com.example.testewtje.repository.ImageRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -23,6 +28,8 @@ import java.util.stream.Collectors;
 public class ImageServiceImpl implements ImageService {
 
     private final AccountService accountService;
+    private final TagService tagService;
+
     private final ImageRepository repository;
     private final ImageMapper mapper;
 
@@ -31,13 +38,17 @@ public class ImageServiceImpl implements ImageService {
     public Page<ImageEntity> getAllImagesByProperty(Image image, Pageable pageable) {
         List<ImageEntity> images;
 
-        if (image != null) {
-            images = repository.findAll(Specification
-                    .where(hasName(image.getName()))
-                    .or(hasContentType(image.getContentType()))
-                    .or(isSized(image.getSize()))
-                    .or(hasReference(image.getReference())));
-        } else
+        if (image.getTags() != null)
+            images = hasTags(image.getTags());
+        else if (image.getName() != null)
+            images = repository.findAll(Specification.where(hasName(image.getName())));
+        else if (image.getContentType() != null)
+            images = repository.findAll(Specification.where(hasContentType(image.getContentType())));
+        else if (image.getPicSize() != null)
+            images = repository.findAll(Specification.where(isSized(image.getPicSize())));
+        else if (image.getReference() != null)
+            images = repository.findAll(Specification.where((hasReference(image.getReference()))));
+        else
             images = repository.findAll();
 
         int page = pageable.getPageNumber() > 0 ? pageable.getPageNumber() - 1 : 0;
@@ -56,9 +67,16 @@ public class ImageServiceImpl implements ImageService {
 
         images.forEach(image -> {
             ImageEntity newImage = mapper.map(image);
-            newImage.setOwnerId(accountService.findByUsername(username).get().getId());
+            newImage.setOwnerId(accountService.findByUsername(username).getId());
             newImage.setCreatedAt(currentDate);
             newImage.setUpdatedAt(currentDate);
+            newImage.setTags(new ArrayList<>());
+
+            image.getTags().forEach(tag -> {
+                tagService.saveTag(tag);
+                newImage.getTags().add(tagService.findByName(tag.getName()));
+            });
+
             repository.save(newImage);
             imageEntities.add(newImage);
         });
@@ -67,23 +85,44 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public void deleteImage(Long id) {
-        repository.delete(repository.findById(id).get());
+        try {
+            repository.delete(repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
-    public void modifyImage(Long id, AccountEntity account, Image image) {
-        ImageEntity resultImage = mapper.map(image);
+    public void modifyImage(Long id, Image image) {
+        ImageEntity imageEntity = findById(id);
 
-        resultImage.setId(id);
-        resultImage.setOwnerId(account.getId());
-        resultImage.setCreatedAt(findById(id).getCreatedAt());
-        resultImage.setUpdatedAt(new Date());
-        repository.save(resultImage);
+        if (((User)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername().equals(
+                accountService.findById(imageEntity.getOwnerId()).getUsername())) {
+            ImageEntity resultImage = mapper.map(image);
+
+            resultImage.setId(id);
+            resultImage.setOwnerId(imageEntity.getOwnerId());
+            resultImage.setCreatedAt(imageEntity.getCreatedAt());
+            resultImage.setUpdatedAt(new Date());
+            repository.save(resultImage);
+        }
     }
 
     @Override
     public ImageEntity findById(Long id) {
-        return repository.findById(id).get();
+        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+
+    private List<ImageEntity> hasTags(List<Tag> tags) {
+        try {
+            List<TagEntity> tagEntities = new ArrayList<>();
+            tags.forEach(tag -> tagEntities.add(tagService.findByName(tag.getName())));
+            return repository.findByTagsIn(tagEntities);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     static Specification<ImageEntity> hasName(String name) {
@@ -94,8 +133,8 @@ public class ImageServiceImpl implements ImageService {
         return (image, cq, cb) -> cb.equal(image.get("contentType"), contentType);
     }
 
-    static Specification<ImageEntity> isSized(BigDecimal size) {
-        return (image, cq, cb) -> cb.equal(image.get("size"), size);
+    static Specification<ImageEntity> isSized(BigDecimal picSize) {
+        return (image, cq, cb) -> cb.equal(image.get("picSize"), picSize);
     }
 
     static Specification<ImageEntity> hasReference(String reference) {

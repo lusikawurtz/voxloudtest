@@ -1,17 +1,12 @@
 package com.example.testewtje.model.entyties;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -26,13 +21,16 @@ public class ImageEntity {
     private Long id;
     private String name;
     private String contentType;
-    private BigDecimal size;
+    private BigDecimal picSize;
     private String reference;
-    private String tags;
-    //    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-//    @JoinColumn(name = "owner_id", referencedColumnName = "id")
-//    private AccountEntity ownerId;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinColumn(referencedColumnName = "name", table = "tag")
+    @ToString.Exclude
+    private List<TagEntity> tags;
+//   @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "owner_id", referencedColumnName = "id", table = "account")
     private Long ownerId;
+//    private AccountEntity owner;
     private Date createdAt;
     private Date updatedAt;
 

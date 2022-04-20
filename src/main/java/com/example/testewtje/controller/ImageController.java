@@ -8,8 +8,10 @@ import com.example.testewtje.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +22,6 @@ import java.util.List;
 public class ImageController {
 
     private final ImageService imageService;
-    private final AccountService accountService;
 
     @GetMapping("/all")
     public Page<ImageEntity> getAllImages(Pageable pageable) {
@@ -33,12 +34,13 @@ public class ImageController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity createImages(@RequestBody List<Image> images, @RequestParam String username) {
+    public ResponseEntity createImages(@RequestBody List<Image> images) {
         try {
-            imageService.createImages(images, username);
+            User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            imageService.createImages(images, user.getUsername());
             return ResponseEntity.ok().build();
-        } catch (HttpMessageNotReadableException e) {
-            return ResponseEntity.badRequest().body("sus");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
@@ -48,14 +50,14 @@ public class ImageController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/modify/{id}/{username}")
-    public ResponseEntity modifyImage(@PathVariable("id") Long id, @PathVariable("username") String username, @RequestBody Image image) {
-        AccountEntity account = accountService.findByUsername(username).get();
-        if (account.getImages().contains(imageService.findById(id))) {
-            imageService.modifyImage(id, account, image);
+    @PostMapping("/modify/{id}")
+    public ResponseEntity modifyImage(@PathVariable("id") Long id, @RequestBody Image image) {
+        try {
+            imageService.modifyImage(id, image);
             return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.badRequest().build();
     }
 
 }

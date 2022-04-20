@@ -4,8 +4,8 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -18,11 +18,10 @@ public class TagEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String tagMessage;
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @ManyToMany(cascade = CascadeType.ALL)
-    private Set<ImageEntity> images;
+//    @ToString.Exclude
+//    @EqualsAndHashCode.Exclude
+//    @ManyToMany(cascade = CascadeType.ALL)
+//    private List<ImageEntity> images;
 
     @Override
     public boolean equals(Object o) {

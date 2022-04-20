@@ -16,7 +16,7 @@ public interface ImageService {
 
     void deleteImage(Long id);
 
-    void modifyImage(Long id, AccountEntity account, Image image);
+    void modifyImage(Long id, Image image);
 
     ImageEntity findById(Long id);
 

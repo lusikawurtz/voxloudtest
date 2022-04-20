@@ -12,15 +12,11 @@ import java.util.Optional;
 public interface AccountService {
 
     Page<AccountEntity> getAllAccounts(Pageable pageable);
-
     Page<AccountEntity> getAllAccountsByProperty(Account account, Pageable pageable);
-
     void createAccount(Account account);
-
     void deleteAccount(Long id);
-
-    Optional<AccountEntity> findByUsername(String username);
-
+    AccountEntity findById(Long id);
+    AccountEntity findByUsername(String username);
     void saveImagesToAccount(List<ImageEntity> images, String username);
 
 }

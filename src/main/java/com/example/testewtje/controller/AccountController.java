@@ -6,6 +6,7 @@ import com.example.testewtje.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +29,12 @@ public class AccountController {
 
     @PostMapping("/create")
     public ResponseEntity createAccount(@RequestBody Account account) {
-        accountService.createAccount(account);
-        return ResponseEntity.ok().build();
+        try {
+            accountService.createAccount(account);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @DeleteMapping("/delete/{id}")

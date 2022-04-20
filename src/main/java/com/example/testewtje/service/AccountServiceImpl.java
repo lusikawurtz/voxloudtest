@@ -26,6 +26,11 @@ public class AccountServiceImpl implements AccountService {
     private final AccountMapper mapper;
 
     @Override
+    public List<AccountEntity> getAllAccounts() {
+        return repository.findAll();
+    }
+
+    @Override
     public Page<AccountEntity> getAllAccounts(Pageable pageable) {
         return repository.findAll(pageable);
     }
@@ -33,7 +38,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Page<AccountEntity> getAllAccountsByProperty(Account account, Pageable pageable) {
         List<AccountEntity> accounts = repository.findAll(Specification
-                .where(hasName(account.getName()))
+                .where(hasName(account.getNickname()))
                 .or(hasUsername(account.getUsername())));
 
         int page = pageable.getPageNumber() > 0 ? pageable.getPageNumber() - 1 : 0;

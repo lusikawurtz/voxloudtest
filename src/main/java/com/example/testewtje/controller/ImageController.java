@@ -1,9 +1,7 @@
 package com.example.testewtje.controller;
 
 import com.example.testewtje.model.dto.Image;
-import com.example.testewtje.model.entyties.AccountEntity;
 import com.example.testewtje.model.entyties.ImageEntity;
-import com.example.testewtje.service.AccountService;
 import com.example.testewtje.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

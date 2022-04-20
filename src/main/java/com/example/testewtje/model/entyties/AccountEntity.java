@@ -11,7 +11,9 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
+@Builder
 @RequiredArgsConstructor
+@AllArgsConstructor
 @Entity(name = "account")
 public class AccountEntity {
 
@@ -20,7 +22,7 @@ public class AccountEntity {
     private Long id;
     private String username;
     private String password;
-    private String name;
+    private String nickname;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToMany(cascade = CascadeType.ALL)

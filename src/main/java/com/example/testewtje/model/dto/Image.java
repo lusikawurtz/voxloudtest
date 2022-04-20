@@ -1,9 +1,6 @@
 package com.example.testewtje.model.dto;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,7 +8,9 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode
+@Builder
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class Image {
 
     private String name;

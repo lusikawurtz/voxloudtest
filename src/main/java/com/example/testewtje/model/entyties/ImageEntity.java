@@ -12,7 +12,9 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
+@Builder
 @RequiredArgsConstructor
+@AllArgsConstructor
 @Entity(name = "image")
 public class ImageEntity {
 
@@ -27,10 +29,8 @@ public class ImageEntity {
     @JoinColumn(referencedColumnName = "name", table = "tag")
     @ToString.Exclude
     private List<TagEntity> tags;
-//   @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "owner_id", referencedColumnName = "id", table = "account")
     private Long ownerId;
-//    private AccountEntity owner;
     private Date createdAt;
     private Date updatedAt;
 

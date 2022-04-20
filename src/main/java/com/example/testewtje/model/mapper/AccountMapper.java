@@ -10,7 +10,7 @@ public interface AccountMapper {
 
     @Mapping(target = "username", source = "username")
     @Mapping(target = "password", source = "password")
-    @Mapping(target = "name", source = "name")
+    @Mapping(target = "nickname", source = "nickname")
     @Mapping(target = "images", source = "images")
     AccountEntity map(Account account);
 

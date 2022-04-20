@@ -1,22 +1,20 @@
 package com.example.testewtje.model.dto;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @Getter
 @Setter
 @EqualsAndHashCode
+@Builder
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class Account {
 
     private String username;
     private String password;
-    private String name;
+    private String nickname;
     private List<Image> images;
 
 }

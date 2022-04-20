@@ -35,6 +35,11 @@ public class ImageServiceImpl implements ImageService {
 
 
     @Override
+    public List<ImageEntity> getAllImages() {
+        return repository.findAll();
+    }
+
+    @Override
     public Page<ImageEntity> getAllImagesByProperty(Image image, Pageable pageable) {
         List<ImageEntity> images;
 

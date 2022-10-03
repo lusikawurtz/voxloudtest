@@ -28,7 +28,7 @@ public class AccountController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity createAccount(@RequestBody Account account) {
+    public ResponseEntity<String>  createAccount(@RequestBody Account account) {
         try {
             accountService.createAccount(account);
             return ResponseEntity.ok().build();
@@ -38,7 +38,7 @@ public class AccountController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity deleteAccount(@PathVariable("id") Long id) {
+    public ResponseEntity<String> deleteAccount(@PathVariable("id") Long id) {
         accountService.deleteAccount(id);
         return ResponseEntity.ok().build();
     }

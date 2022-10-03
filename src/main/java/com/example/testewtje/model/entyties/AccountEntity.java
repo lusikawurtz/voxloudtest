@@ -13,7 +13,6 @@ import java.util.Objects;
 @ToString
 @Builder
 @RequiredArgsConstructor
-@AllArgsConstructor
 @Entity(name = "account")
 public class AccountEntity {
 

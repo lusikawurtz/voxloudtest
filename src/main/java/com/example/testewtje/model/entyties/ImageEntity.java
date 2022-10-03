@@ -14,7 +14,6 @@ import java.util.Objects;
 @ToString
 @Builder
 @RequiredArgsConstructor
-@AllArgsConstructor
 @Entity(name = "image")
 public class ImageEntity {
 

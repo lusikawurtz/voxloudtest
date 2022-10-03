@@ -29,7 +29,6 @@ public class ImageServiceImpl implements ImageService {
 
     private final AccountService accountService;
     private final TagService tagService;
-
     private final ImageRepository repository;
     private final ImageMapper mapper;
 
@@ -46,13 +45,13 @@ public class ImageServiceImpl implements ImageService {
         if (image.getTags() != null)
             images = hasTags(image.getTags());
         else if (image.getName() != null)
-            images = repository.findAll(Specification.where(hasName(image.getName())));
+            images = repository.findAll(Specification.where(hasField("name", image.getName())));
         else if (image.getContentType() != null)
-            images = repository.findAll(Specification.where(hasContentType(image.getContentType())));
+            images = repository.findAll(Specification.where(hasField("contentType", image.getContentType())));
         else if (image.getPicSize() != null)
             images = repository.findAll(Specification.where(isSized(image.getPicSize())));
         else if (image.getReference() != null)
-            images = repository.findAll(Specification.where((hasReference(image.getReference()))));
+            images = repository.findAll(Specification.where((hasField("reference", image.getReference()))));
         else
             images = repository.findAll();
 
@@ -130,20 +129,12 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
-    static Specification<ImageEntity> hasName(String name) {
-        return (image, cq, cb) -> cb.equal(image.get("name"), name);
-    }
-
-    static Specification<ImageEntity> hasContentType(String contentType) {
-        return (image, cq, cb) -> cb.equal(image.get("contentType"), contentType);
+    static Specification<ImageEntity> hasField(String fieldName, String field) {
+        return (image, cq, cb) -> cb.equal(image.get(fieldName), field);
     }
 
     static Specification<ImageEntity> isSized(BigDecimal picSize) {
         return (image, cq, cb) -> cb.equal(image.get("picSize"), picSize);
-    }
-
-    static Specification<ImageEntity> hasReference(String reference) {
-        return (image, cq, cb) -> cb.equal(image.get("reference"), reference);
     }
 
 }

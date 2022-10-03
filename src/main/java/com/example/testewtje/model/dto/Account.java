@@ -9,7 +9,6 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 @RequiredArgsConstructor
-@AllArgsConstructor
 public class Account {
 
     private String username;

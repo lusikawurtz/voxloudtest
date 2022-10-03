@@ -10,7 +10,4 @@ public interface TagMapper {
 
     TagEntity map(Tag tag);
 
-//    @Mapping(target = "name", source = "tag")
-//    TagEntity map(String tag);
-
 }

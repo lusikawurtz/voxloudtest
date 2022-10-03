@@ -10,7 +10,6 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 @RequiredArgsConstructor
-@AllArgsConstructor
 public class Image {
 
     private String name;
